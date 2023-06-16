@@ -4,6 +4,9 @@ secrets.toml
 *sandbox*
 TODO
 
+frontend-vue
+node_modules
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

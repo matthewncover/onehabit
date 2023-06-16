@@ -9,5 +9,5 @@ if __name__ == "__main__":
     Smoked some sativa and couldn't fall asleep. Youtube rabbithole Lost track of time.
     Binging netflix. Late night edible. Instagram got the best of me.
     """
-    response = coach.respond(message)
+    response = coach.chat_response(message)
     pass
