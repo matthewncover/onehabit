@@ -16,7 +16,7 @@ class GoalTrackingDatabase:
         try:
             yield cursor
         finally:
-            self.connection.closed()
+            self.connection.close()
     
     def _connect(self):
         self.connection = connect(
@@ -25,6 +25,17 @@ class GoalTrackingDatabase:
             user = os.getenv("DATABASE_USERNAME"),
             password = os.getenv("DATABASE_PASSWORD")
         )
+
+    def create_tables(self):
+        ## HACK
+
+        schema_filepath = "./src/data/schema.sql"
+        with open(schema_filepath, "r") as schema:
+            create_tables_sql = schema.read()
+        
+        with self.connect() as cursor:
+            cursor.execute(create_tables_sql)
+            self.connection.commit()
 
     ## TODO
     ## push
@@ -65,3 +76,15 @@ class GoalTrackingDatabase:
 
         with self.connect() as cursor:
             cursor.execute(query)
+            return cursor.fetchall()
+
+    def get_password(self, username:str):
+        query = f"select password_hash from users where username = '{username}'"
+
+        with self.connect() as cursor:
+            cursor.execute(query)
+            return cursor.fetchone()
+        
+if __name__ == "__main__":
+    gtdb = GoalTrackingDatabase()
+    gtdb.create_tables()
