@@ -1,6 +1,6 @@
 import streamlit as st
 
-from ..data.database import GoalTrackingDatabase
+from ..data.database import OneHabitDatabase
 
 class Page:
     
@@ -8,4 +8,4 @@ class Page:
         st.header("Goal Tracker")
         st.divider()
 
-        self.gtdb = GoalTrackingDatabase()
+        self.gtdb = OneHabitDatabase()

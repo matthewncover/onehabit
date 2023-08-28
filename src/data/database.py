@@ -1,10 +1,11 @@
 import os
+from matplotlib import table
 from psycopg2 import connect
 from dotenv import load_dotenv
 
 from contextlib import contextmanager
 
-class GoalTrackingDatabase:
+class OneHabitDatabase:
 
     def __init__(self):
         load_dotenv()
@@ -23,8 +24,9 @@ class GoalTrackingDatabase:
             host = os.getenv("HOST_IP"),
             database = os.getenv("DATABASE_NAME"),
             user = os.getenv("DATABASE_USERNAME"),
-            password = os.getenv("DATABASE_PASSWORD")
-        )
+            password = os.getenv("DATABASE_PASSWORD"))
+
+        self.connection.autocommit = True
 
     def create_tables(self):
         ## HACK
@@ -35,26 +37,8 @@ class GoalTrackingDatabase:
         
         with self.connect() as cursor:
             cursor.execute(create_tables_sql)
-            self.connection.commit()
 
-    ## TODO
-    ## push
-    ## _setup_push
-    ## function to create new user
-    ## function to create new goal
-    ## function to create new goal version
-    ## function to add daily response
-    ##
-    ## pull
-    ## _setup_pull
-    ## function to pull the configs of the newest versions of all active goals
-    ## 
-    ## update
-    ## function to update response for a given day
-    ##
-    ## other
-    ## function for whether a user exists
-    
+    # region push
 
     def push(self, table_name:str, data:dict):
 
@@ -66,25 +50,86 @@ class GoalTrackingDatabase:
 
         with self.connect() as cursor:
             cursor.execute(query, values)
-            self.connection.commit()
 
-    def pull(self, table_name:str, condition:str=None):
+    @classmethod
+    def add_new_user(cls, data:dict):
+        cls.push(table_name="users", data=data)
+    
+    @classmethod
+    def add_new_goal(cls, data:dict):
+        cls.push(table_name="goals", data=data)
+    
+    @classmethod
+    def add_new_goal_version(cls):
+        raise NotImplementedError
+    
+    @classmethod
+    def add_response(cls, response_data:dict):
+        raise NotImplementedError
 
-        query = f"SELECT * FROM {table_name}"
-        if condition is not None:
-            query += f" WHERE {condition}"
+    #endregion
+    #region pull
 
-        with self.connect() as cursor:
-            cursor.execute(query)
-            return cursor.fetchall()
-
-    def get_password(self, username:str):
-        query = f"select password_hash from users where username = '{username}'"
-
-        with self.connect() as cursor:
-            cursor.execute(query)
-            return cursor.fetchone()
+    def pull(self, table_name:str, columns:list=None, 
+             condition:str=None, condition_args:tuple=None,
+             sorted_condition:str=None, one_record:bool=False):
         
-if __name__ == "__main__":
-    gtdb = GoalTrackingDatabase()
-    gtdb.create_tables()
+        cols = '*' if columns is None else ', '.join(columns)
+        query = f"select {cols} from {table_name}"
+        if condition is not None:
+            query += f" where {condition}"
+
+        if sorted_condition is not None:
+            query += f"order by {sorted_condition}"
+
+        with self.connect() as cursor:
+            cursor.execute(query)
+
+            if one_record:
+                return dict(zip(columns, cursor.fetchone()))
+            return [dict(zip(columns, x)) for x in cursor.fetchall()]
+    
+    @classmethod
+    def get_user(cls, username:str):
+        condition = "username = %s"
+        return cls.pull(
+            table_name="users",
+            condition=condition,
+            condition_args=(username,),
+            one_record=True)
+    
+    @classmethod
+    def get_goals(cls, user_id:str):
+        condition = "user_id = %s and archived = false"
+        return cls.pull(
+            table_name="goals",
+            condition=condition,
+            condition_args=(user_id,),
+            sorted_condition="user_id, goal_id, goal_version asc")
+    
+    @classmethod
+    def get_password_hash(cls, username:str):
+        condition = "username = %s"
+        return cls.pull(
+            table_name="users",
+            columns="password_hash",
+            condition=condition,
+            condition_args=(username,),
+            one_record=True)
+        
+    #endregion
+    #region update
+
+    def update(self, table_name: str, data:dict, condition:str, condition_args:tuple):
+
+        set_clause = ", ".join([f"{column} = %s" for column in data.keys()])
+        query = f"update {table_name} set {set_clause} where {condition}"
+
+        with self.connect() as cursor:
+            cursor.execute(query, (*data.values(), *condition_args))
+
+    @classmethod
+    def update_response(cls, response_id):
+        raise NotImplementedError
+
+    #endregion
