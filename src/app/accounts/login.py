@@ -9,14 +9,14 @@ class LoginPage(Page):
     def __init__(self):
         super().__init__()
         
-        _, col, back_col = st.columns(3)
+        _, col, _ = st.columns(3)
         with col:
             st.header("Login")
             self.login_form()
 
-        with back_col:
-            Utils.empty_lines(15)
-            Utils.back_button("HomePage")
+        if col.button("Create account"):
+            st.session_state.current_page = "CreateAccountPage"
+            st.experimental_rerun()
 
     def login_form(self):
         with st.form(key="login_form"):

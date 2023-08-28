@@ -28,5 +28,5 @@ class GoalTrackingApp:
         for page in Pages:
             setattr(self, page.name, page.value)
 
-        st.session_state.setdefault("current_page", "HomePage")
+        st.session_state.setdefault("current_page", "LoginPage")
         getattr(self, st.session_state.current_page)()
