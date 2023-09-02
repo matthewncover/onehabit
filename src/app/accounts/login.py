@@ -25,7 +25,7 @@ class LoginPage(Page):
             password_input = st.text_input("Password", type="password")
 
             if st.form_submit_button("Submit"):
-                hashed_password = self.gtdb.get_password(username=username_input)
+                hashed_password = self.gtdb.get_password_hash(username=username_input)
                 if password_input is not None and hashed_password is not None:
                     password_validated = self._check_password(hashed_password, password_input)
 
@@ -38,7 +38,7 @@ class LoginPage(Page):
                         st.error("Incorrect password")
 
                 else:
-                    st.error(f"User 'matthew' not found.")
+                    st.error(f"User '{username_input}' not found.")
 
     def _check_password(self, hashed_password, password_input):
         return bcrypt.checkpw(

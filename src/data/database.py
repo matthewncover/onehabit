@@ -1,5 +1,4 @@
 import os
-from matplotlib import table
 from psycopg2 import connect
 from dotenv import load_dotenv
 
@@ -28,15 +27,9 @@ class OneHabitDatabase:
 
         self.connection.autocommit = True
 
-    def create_tables(self):
-        ## HACK
-
-        schema_filepath = "./src/data/schema.sql"
-        with open(schema_filepath, "r") as schema:
-            create_tables_sql = schema.read()
-        
-        with self.connect() as cursor:
-            cursor.execute(create_tables_sql)
+    def zip_results(self, cursor):
+        columns = [desc[0] for desc in cursor.description]
+        return [dict(zip(columns, x)) for x in cursor.fetchall()]
 
     # region push
 
@@ -51,21 +44,17 @@ class OneHabitDatabase:
         with self.connect() as cursor:
             cursor.execute(query, values)
 
-    @classmethod
-    def add_new_user(cls, data:dict):
-        cls.push(table_name="users", data=data)
+    def add_new_user(self, data:dict):
+        self.push(table_name="users", data=data)
     
-    @classmethod
-    def add_new_goal(cls, data:dict):
-        cls.push(table_name="goals", data=data)
+    def add_new_goal(self, data:dict):
+        self.push(table_name="goals", data=data)
     
-    @classmethod
-    def add_new_goal_version(cls):
-        raise NotImplementedError
-    
-    @classmethod
-    def add_response(cls, response_data:dict):
-        raise NotImplementedError
+    def add_new_goal_version(self, data:dict):
+        self.push(table_name="goals", data=data)
+
+    def add_response(self, data:dict):
+        self.push(table_name="response", data=data)
 
     #endregion
     #region pull
@@ -83,39 +72,54 @@ class OneHabitDatabase:
             query += f"order by {sorted_condition}"
 
         with self.connect() as cursor:
-            cursor.execute(query)
+            if condition_args is not None:
+                cursor.execute(query, condition_args)
+            else:
+                cursor.execute(query)
 
             if one_record:
-                return dict(zip(columns, cursor.fetchone()))
-            return [dict(zip(columns, x)) for x in cursor.fetchall()]
+                if len(columns) == 1:
+                    return cursor.fetchone()[0]
+                else:
+                    return dict(zip(columns, cursor.fetchone()))
+            return self.zip_results(cursor)
     
-    @classmethod
-    def get_user(cls, username:str):
+    def get_user(self, username:str):
         condition = "username = %s"
-        return cls.pull(
+        return self.pull(
             table_name="users",
             condition=condition,
             condition_args=(username,),
             one_record=True)
     
-    @classmethod
-    def get_goals(cls, user_id:str):
-        condition = "user_id = %s and archived = false"
-        return cls.pull(
-            table_name="goals",
-            condition=condition,
-            condition_args=(user_id,),
-            sorted_condition="user_id, goal_id, goal_version asc")
+    def get_goals(self, user_id:str):
+        query = """
+        select  goal_id, goal_version, user_id, created_date, active, archived
+        from    (select *, row_number() over (partition by goal_id order by goal_version desc) as rn
+                from goals
+                where user_id = %s and archived = false) as sub
+        where rn = 1
+        """
+
+        with self.connect() as cursor:
+            cursor.execute(query, (user_id,))
+            return self.zip_results(cursor)
+
+        # condition = "user_id = %s and archived = false"
+        # return cls.pull(
+        #     table_name="goals",
+        #     condition=condition,
+        #     condition_args=(user_id,),
+        #     sorted_condition="user_id, goal_id, goal_version asc")
     
-    @classmethod
-    def get_password_hash(cls, username:str):
+    def get_password_hash(self, username:str):
         condition = "username = %s"
-        return cls.pull(
+        return self.pull(
             table_name="users",
-            columns="password_hash",
+            columns=["password_hash"],
             condition=condition,
             condition_args=(username,),
-            one_record=True)
+            one_record=True).tobytes()
         
     #endregion
     #region update
@@ -128,8 +132,7 @@ class OneHabitDatabase:
         with self.connect() as cursor:
             cursor.execute(query, (*data.values(), *condition_args))
 
-    @classmethod
-    def update_response(cls, response_id):
+    def update_response(self, response_id):
         raise NotImplementedError
 
     #endregion

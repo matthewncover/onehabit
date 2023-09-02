@@ -21,7 +21,7 @@ class Pages(Enum):
     TrackerPage = TrackerPage
     AnalysisPage = AnalysisPage
 
-class GoalTrackingApp:
+class OneHabitApp:
 
     def __init__(self):
 
