@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import uuid, datetime as dt
 
+from .utils import DataUtils
 from .database import OneHabitDatabase as ohdb
 
 #region one goal
@@ -10,7 +11,7 @@ class Goal:
     goal_version: str = field(default="001")
 
     user_id: uuid.UUID
-    created_date: dt.datetime = field(default=dt.datetime.now())
+    created_date: dt.datetime = field(default_factory=dt.datetime.now)
     _goal: dict
 
     active: bool = field(default=False)
@@ -29,7 +30,9 @@ class Goal:
                 for x in dir(self)
                 if not x.startswith("_")}
     
-    #region version bumping
+    def add_to_db(self):
+        data = DataUtils.make_payload(self)
+        ohdb.add_new_goal(data)
 
     def bump_version(self):
         if not self._version_bump_required():
@@ -40,11 +43,6 @@ class Goal:
     def _version_bump_required(self):
         return False
     
-    def _add_to_db(self):
-        data = self.make_payload()
-        ohdb.add_new_goal(data)
-    
-    #endregion
 #endregion
 
 @dataclass
@@ -56,5 +54,4 @@ class GoalSet:
         self.goals = self._get_goal_set()
 
     def _get_goal_set(self):
-        return ohdb.get_goals(self.user_id)
-
+        return [Goal(**x) for x in ohdb.get_goals(self.user_id)]
