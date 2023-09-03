@@ -1,0 +1,1 @@
+from .coach.model import Coach
