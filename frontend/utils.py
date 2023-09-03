@@ -8,6 +8,13 @@ class Utils:
         if back:
             st.session_state.current_page = page
             st.experimental_rerun()
+
+    @staticmethod
+    def logout_button():
+        logout = st.button("logout")
+        if logout:
+            st.session_state.current_page = "LoginPage"
+            st.experimental_rerun()
     
     @staticmethod
     def empty_lines(n=1):
