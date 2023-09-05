@@ -23,3 +23,9 @@ class Utils:
     @staticmethod
     def not_implemented():
         st.write("Not Implemented")
+
+    ## BUG
+    ## does not work
+    @staticmethod
+    def aligned_text(text:str, how="center"):
+        st.markdown(f"<text style='text-align: {how}; color: white;'>{text}</text>", unsafe_allow_html=True)

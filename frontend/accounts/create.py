@@ -3,7 +3,8 @@ import bcrypt
 
 from .. import Page
 from ..utils import Utils
-from ...data.database import OneHabitDatabase
+
+from onehabit import OneHabitDatabase
 
 class CreateAccountPage(Page):
 

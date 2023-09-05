@@ -1,25 +1,42 @@
 import streamlit as st
 
-from .home import HomePage
-from .welcome import WelcomePage
 from .accounts.login import LoginPage
 from .accounts.create import CreateAccountPage
 
-from .editor import EditorPage
-from .tracker import TrackerPage
-from .analysis import AnalysisPage
+from . import Page
+
+from .why import WhyTab
+from .editor import EditorTab
+from .tracker import TrackerTab
+from .analysis import AnalysisTab
 
 from enum import Enum
 
+
+class MainPage(Page):
+
+    def __init__(self):
+        _, col, _ = st.columns((1, 3, 1))
+
+        with col:
+            st.subheader("One Habit")
+
+            tab_names = [":grey[Why]", ":orange[Tracker]", ":blue[Editor]", ":violet[Analysis]"]
+            tab_classes = [WhyTab, TrackerTab, EditorTab, AnalysisTab]
+
+            for tab, cls in zip(st.tabs(tab_names), tab_classes):
+                with tab:
+                    cls()
+
 class Pages(Enum):
-    HomePage = HomePage
-    WelcomePage = WelcomePage
     LoginPage = LoginPage
     CreateAccountPage = CreateAccountPage
 
-    EditorPage = EditorPage
-    TrackerPage = TrackerPage
-    AnalysisPage = AnalysisPage
+    MainPage = MainPage
+
+    EditorTab = EditorTab
+    TrackerTab = TrackerTab
+    AnalysisTab = AnalysisTab
 
 class OneHabitApp:
 

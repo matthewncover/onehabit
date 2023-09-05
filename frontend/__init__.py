@@ -1,11 +1,9 @@
 import streamlit as st
 
-from ..data.database import OneHabitDatabase
+from onehabit import OneHabitDatabase
 
 class Page:
-    
-    def __init__(self):
-        st.header("One Habit")
-        st.divider()
+    gtdb = OneHabitDatabase()
 
-        self.gtdb = OneHabitDatabase()
+class Tab:
+    gtdb = OneHabitDatabase()

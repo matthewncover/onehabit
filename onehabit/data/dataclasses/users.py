@@ -1,16 +1,17 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import re, uuid
 
-from .database import OneHabitDatabase as ohdb
+from ..database import OneHabitDatabase as ohdb
+from ..utils import DataUtils
 
 class ValidationError(Exception):
     pass
 
 @dataclass
 class User:
-    user_id: uuid.UUID
-    _username: str
-    _user_email: str
+    id: uuid.UUID
+    _username: str = field(repr=False)
+    _email: str = field(repr=False)
     password_hash: bytes
 
     def __setattr__(self, name, value):
@@ -20,8 +21,12 @@ class User:
 
     @classmethod
     def from_existing(cls, username:str):
-        user_data = ohdb.get_user(username)
-        return cls(**user_data)
+        db = ohdb()
+        data = ohdb.get_user(db, username)
+        return cls(id=data["id"],
+                   _username=data["username"],
+                   _email=data["email"],
+                   password_hash=data["password_hash"])
 
     #region username
     @property
@@ -37,14 +42,14 @@ class User:
     #endregion
     #region email
     @property
-    def user_email(self):
-        return self._user_email
+    def email(self):
+        return self._email
 
-    @user_email.setter
-    def user_email(self, value: str):
+    @email.setter
+    def email(self, value: str):
         if not re.match(r"[^@]+@[^@]+\.[^@]+", value):
             raise ValidationError(f"Invalid email address: {value}")
-        self._user_email = value
+        self._email = value
 
     #endregion
 
@@ -52,3 +57,8 @@ class User:
     def validate_password(password: str):
         if len(password) < 7:
             raise ValidationError("Password must be > 7 characters")
+        
+    def add_to_db(self):
+        data = DataUtils.make_payload(self)
+        db = ohdb()
+        ohdb.add_new_user(db, data)

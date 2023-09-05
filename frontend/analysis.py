@@ -1,10 +1,10 @@
 import streamlit as st
 
-from . import Page
+from . import Tab
 from .utils import Utils
 
-class AnalysisPage(Page):
+class AnalysisTab(Tab):
 
     def __init__(self):
         super().__init__()
-        Utils.not_implemented()
+        st.write("Analysis")

@@ -1,25 +1,40 @@
-create extension if not exists "uuid-ossp";
-
-create table users(
-    user_id uuid primary key default uuid_generate_v4(),
-    username varchar(255) unique not null,
-    user_email varchar(255) unique,
-    password_hash bytea not null
+CREATE TABLE dev.users (
+    id uuid DEFAULT dev.uuid_generate_v4() NOT NULL,
+    username character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    password_hash bytea NOT NULL
 );
 
-create table goals (
-    goal_id uuid default uuid_generate_v4(),
-    goal_version text not null,
-    user_id uuid references users(user_id),
-    created_date timestamp not null default current_timestamp,
-    goal jsonb not null,
-    active boolean not null,
-    primary key (goal_id, goal_version)
+CREATE TABLE dev.habits (
+    id uuid DEFAULT dev.uuid_generate_v4() NOT NULL,
+    user_id uuid,
+    created_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    metadata jsonb NOT NULL,
+    active boolean NOT NULL,
+    archived boolean DEFAULT false NOT NULL
 );
 
-create table responses (
-    response_id uuid primary key default uuid_generate_v4(),
-    user_id uuid references users(user_id),
-    response_date timestamp not null default current_timestamp,
-    response jsonb not null
+CREATE TABLE dev.habit_versions (
+    id uuid DEFAULT dev.uuid_generate_v4() NOT NULL,
+    habit_id uuid REFERENCES dev.habits(id),
+    version_description text NOT NULL,
+    created_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    metadata jsonb NOT NULL
+);
+
+CREATE TABLE dev.observations (
+    id uuid DEFAULT dev.uuid_generate_v4() NOT NULL,
+    user_id uuid,
+    created_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    metadata jsonb NOT NULL,
+    archived boolean DEFAULT false NOT NULL
+);
+
+CREATE TABLE dev.responses (
+    id uuid DEFAULT dev.uuid_generate_v4() NOT NULL,
+    user_id uuid,
+    ref_id uuid,  -- This can reference either habits or observations based on type
+    type text CHECK(type IN ('habit', 'observation')),  -- Enum type for either habit or observation
+    date timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    metadata jsonb NOT NULL
 );

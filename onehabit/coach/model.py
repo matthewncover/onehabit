@@ -30,7 +30,8 @@ class Coach:
 
     
     def discrete_response(self, context:str, response_set:list):
-        """respond with one of a discrete set of responses
+        """respond with one of a discrete set of responses.
+            completion, not chat.
         """
         logprobs = {x: self._get_log_probability(context, x)["logprob"] for x in response_set}
         return max(logprobs, key=logprobs.get)

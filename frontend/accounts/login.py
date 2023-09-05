@@ -4,6 +4,8 @@ import bcrypt
 from .. import Page
 from ..utils import Utils
 
+from onehabit import User, HabitSet
+
 class LoginPage(Page):
 
     def __init__(self):
@@ -21,8 +23,8 @@ class LoginPage(Page):
     def login_form(self):
         with st.form(key="login_form"):
             
-            username_input = st.text_input("Username")
-            password_input = st.text_input("Password", type="password")
+            username_input = st.text_input("Username", value="matthew")
+            password_input = st.text_input("Password", type="password", value="yeet69")
 
             if st.form_submit_button("Submit"):
                 hashed_password = self.gtdb.get_password_hash(username=username_input)
@@ -30,7 +32,11 @@ class LoginPage(Page):
                     password_validated = self._check_password(hashed_password, password_input)
 
                     if hashed_password and password_validated:
-                        st.session_state.current_page = "WelcomePage"
+                        st.session_state.current_page = "MainPage"
+
+                        st.session_state.user = User.from_existing(username_input)
+                        st.session_state.habit_set = HabitSet(user_id=st.session_state.user.id)
+
                         st.success("Success")
                         st.experimental_rerun()
 
