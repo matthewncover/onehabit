@@ -12,6 +12,11 @@ from .analysis import AnalysisTab
 
 from enum import Enum
 
+class Tabs(Enum):
+    why_tab = WhyTab
+    EditorTab = EditorTab
+    TrackerTab = TrackerTab
+    AnalysisTab = AnalysisTab
 
 class MainPage(Page):
 
@@ -22,7 +27,7 @@ class MainPage(Page):
             st.subheader("One Habit")
 
             tab_names = [":grey[Why]", ":orange[Tracker]", ":blue[Editor]", ":violet[Analysis]"]
-            tab_classes = [WhyTab, TrackerTab, EditorTab, AnalysisTab]
+            tab_classes = [x.value for x in Tabs]
 
             for tab, cls in zip(st.tabs(tab_names), tab_classes):
                 with tab:
@@ -31,12 +36,7 @@ class MainPage(Page):
 class Pages(Enum):
     LoginPage = LoginPage
     CreateAccountPage = CreateAccountPage
-
     MainPage = MainPage
-
-    EditorTab = EditorTab
-    TrackerTab = TrackerTab
-    AnalysisTab = AnalysisTab
 
 class OneHabitApp:
 

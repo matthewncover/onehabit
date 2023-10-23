@@ -4,6 +4,14 @@ secrets.toml
 *sandbox*
 TODO
 
+# frontend vue
+/frontend-vue/node_modules/
+/node_modules/
+/frontend-vue/dist/
+/dist/
+/frontend-vue/.env
+/.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
