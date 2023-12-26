@@ -1,5 +1,5 @@
 from .api import APIUtils
-from ..data.dataclasses.prompts import Prompts
+from ...data.dataclasses.prompts import Prompts
 
 class Coach:
 

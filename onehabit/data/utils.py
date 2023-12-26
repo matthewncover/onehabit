@@ -1,6 +1,27 @@
-from dataclasses import is_dataclass, fields
-from pydantic import BaseModel
 from uuid import UUID
+from dataclasses import is_dataclass, fields
+
+from pydantic import BaseModel
+from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects.postgresql import JSONB
+
+class JSONBPydantic(TypeDecorator):
+    impl = JSONB
+
+    def __init__(self, model: BaseModel):
+        self.model = model
+        super().__init__()
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return value.model_dump_json()
+        return value
+    
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return self.model(**value)
+        return value        
+
 
 class DataUtils:
 

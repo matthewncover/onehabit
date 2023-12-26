@@ -4,7 +4,7 @@ import bcrypt
 from .. import Page
 from ..utils import Utils
 
-from onehabit import User, HabitSet
+from onehabit import User
 
 class LoginPage(Page):
 
@@ -35,7 +35,6 @@ class LoginPage(Page):
                         st.session_state.current_page = "MainPage"
 
                         st.session_state.user = User.from_existing(username_input)
-                        st.session_state.habit_set = HabitSet(user_id=st.session_state.user.id)
 
                         st.success("Success")
                         st.experimental_rerun()

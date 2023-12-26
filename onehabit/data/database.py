@@ -1,148 +1,79 @@
-import os
-from psycopg2 import connect
+import os, datetime as dt
+from typing import List, Union, Type
 from dotenv import load_dotenv
 
-from contextlib import contextmanager
+import sqlalchemy as sa
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm.session import Session
+from sqlalchemy.exc import OperationalError
+
+from onehabit.utils import DevUtils
+
+SA_BASE = declarative_base()
+
+# def operational_error_handler(
 
 class OneHabitDatabase:
 
-    ##HACK
-    SCHEMA = "dev"
-
     def __init__(self):
         load_dotenv()
+        self._engine = None
+        self._session_maker = None
 
-    @contextmanager
-    def connect(self):
-        self._connect()
-        cursor = self.connection.cursor()
-        try:
-            yield cursor
-        finally:
-            self.connection.close()
+    @property
+    def engine(self):
+        if not self._engine:
+            self._engine = self._create_engine()
+        return self._engine
     
-    def _connect(self):
-        self.connection = connect(
-            host = os.getenv("HOST_IP"),
-            database = os.getenv("DATABASE_NAME"),
-            user = os.getenv("DATABASE_USERNAME"),
-            password = os.getenv("DATABASE_PASSWORD"))
+    @property
+    def session_maker(self):
+        if not self._session_maker:
+            self._session_maker = sessionmaker(bind=self.engine)
+        return self._session_maker
 
-        self.connection.autocommit = True
+    def _create_engine(self):
+        username    = os.getenv('DATABASE_USERNAME')
+        password    = os.getenv('DATABASE_PASSWORD')
+        host        = os.getenv('HOST_IP')
+        db_name     = os.getenv('DATABASE_NAME')
 
-    def get_colnames(self, cursor):
-        return [desc[0] for desc in cursor.description]
+        return sa.create_engine(f"postgresql+psycopg2://{username}:{password}@{host}/{db_name}")
 
-    def zip_results(self, cursor):
-        columns = self.get_colnames(cursor)
-        return [dict(zip(columns, x)) for x in cursor.fetchall()]
+    def add(self, records: Union[SA_BASE, List[SA_BASE]]) -> List[int]:
+        records = DevUtils.assert_as_list(records)
 
-    # region push
+        with self.session_maker() as session:
+            session: Session
+            session.add_all(records)
+            session.commit()
 
-    def push(self, table_name:str, data:dict):
-
-        columns_str = ", ".join(data.keys())
-        values_str = ", ".join(["%s"] * len(data))
-        values = tuple(data.values())
-
-        query = f"INSERT INTO {self.SCHEMA}.{table_name} ({columns_str}) VALUES ({values_str})"
-
-        with self.connect() as cursor:
-            cursor.execute(query, values)
-
-    def add_new_user(self, data:dict):
-        self.push(table_name="users", data=data)
+        return [record.id for record in records]
     
-    def add_new_habit(self, data:dict):
-        self.push(table_name="habits", data=data)
-    
-    def add_new_habit_version(self, data:dict):
-        self.push(table_name="habits", data=data)
+    def update(self, records: Union[SA_BASE, List[SA_BASE]]) -> List[int]:
+        records = DevUtils.assert_as_list(records)
 
-    def add_response(self, data:dict):
-        self.push(table_name="responses", data=data)
+        with self.session_maker() as session:
+            for record in records:
+                record.modified_at = dt.datetime.utcnow()
+                session.merge(record)
 
-    def add_observation(self, data:dict):
-        self.push(table_name="observations", data=data)
+            session.commit()
 
-    #endregion
-    #region pull
+        return [record.id for record in records]
 
-    def pull(self, table_name:str, columns:list=None, 
-             condition:str=None, condition_args:tuple=None,
-             sorted_condition:str=None, one_record:bool=False):
+    def pull(self, sa_model: Type[SA_BASE], *filters:list, 
+             order_by:str=None, limit:int=None) -> List[SA_BASE]:
         
-        cols = '*' if columns is None else ', '.join(columns)
-        query = f"select {cols} from {self.SCHEMA}.{table_name}"
-        if condition is not None:
-            query += f" where {condition}"
+        with self.session_maker() as session:
+            query = session.query(sa_model).filter(*filters)
 
-        if sorted_condition is not None:
-            query += f"order by {sorted_condition}"
+            if order_by is not None:
+                query = query.order_by(order_by)
 
-        with self.connect() as cursor:
-            if condition_args is not None:
-                cursor.execute(query, condition_args)
-            else:
-                cursor.execute(query)
+            if limit is not None:
+                query = query.limit(limit)
 
-            if one_record:
-                if columns is not None:
-                    return cursor.fetchone()[0] if len(columns) == 1 else dict(zip(columns, cursor.fetchone()))
-                else:
-                    return dict(zip(self.get_colnames(cursor), cursor.fetchone()))
-                
-            return self.zip_results(cursor)
-    
-    def get_user(self, username:str):
-        condition = "username = %s"
-        return self.pull(
-            table_name="users",
-            condition=condition,
-            condition_args=(username,),
-            one_record=True)
-    
-    def get_habits(self, user_id:str):
-        ## TODO
-        ## not validated
+            records = query.all()
 
-        query = """
-        select  id, version, metadata, user_id, created_date, active, archived
-        from    (select *, row_number() over (partition by id order by version desc) as rn
-                from habits
-                where user_id = %s and archived = false) as sub
-        where rn = 1
-        """
-
-        with self.connect() as cursor:
-            cursor.execute(query, (user_id,))
-            return self.zip_results(cursor)
-
-    def get_password_hash(self, username:str):
-        condition = "username = %s"
-        return self.pull(
-            table_name="users",
-            columns=["password_hash"],
-            condition=condition,
-            condition_args=(username,),
-            one_record=True).tobytes()
-        
-    #endregion
-    #region update
-
-    def update(self, table_name: str, data:dict, condition:str, condition_args:tuple):
-        set_clause = ", ".join([f"{column} = %s" for column in data.keys()])
-        query = f"update {self.SCHEMA}.{table_name} set {set_clause} where {condition}"
-
-        with self.connect() as cursor:
-            cursor.execute(query, (*data.values(), *condition_args))
-
-    def update_response(self, response_id, data):
-        condition = "id = %s"
-        return self.update(
-            table_name = "responses",
-            data = data,
-            condition = condition,
-            condition_args=(response_id,))
-
-    #endregion
+        return records
