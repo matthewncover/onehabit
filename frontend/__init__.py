@@ -1,9 +1,9 @@
 import streamlit as st
 
-from onehabit import OneHabitDatabase
+from onehabit.data import OneHabitDatabase
 
 class Page:
-    gtdb = OneHabitDatabase()
+    ohdb = OneHabitDatabase()
 
 class Tab:
-    gtdb = OneHabitDatabase()
+    ohdb = OneHabitDatabase()

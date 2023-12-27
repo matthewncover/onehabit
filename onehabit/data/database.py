@@ -48,7 +48,9 @@ class OneHabitDatabase:
             session.add_all(records)
             session.commit()
 
-        return [record.id for record in records]
+            ids = [record.id for record in records]
+
+        return ids
     
     def update(self, records: Union[SA_BASE, List[SA_BASE]]) -> List[int]:
         records = DevUtils.assert_as_list(records)
@@ -60,7 +62,9 @@ class OneHabitDatabase:
 
             session.commit()
 
-        return [record.id for record in records]
+            ids = [record.id for record in records]
+
+        return ids
 
     def pull(self, sa_model: Type[SA_BASE], *filters:list, 
              order_by:str=None, limit:int=None) -> List[SA_BASE]:

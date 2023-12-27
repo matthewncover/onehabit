@@ -1,6 +1,6 @@
 import streamlit as st
 st.set_page_config(layout="wide")
 
-from frontend.main import OneHabitApp
+from frontend.onehabit import OneHabitApp
 
 OneHabitApp()

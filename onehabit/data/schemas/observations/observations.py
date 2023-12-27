@@ -13,7 +13,8 @@ class Observation(SA_BASE):
     __tablename__ = "observations"
     __table_args__ = {"schema": "observations"}
 
-    id = sa.Column(BIGINT, primary_key=True)
+    id_seq = sa.Sequence("seq_observations_id", schema="observations", metadata=SA_BASE.metadata)
+    id = sa.Column(BIGINT, id_seq, server_default=id_seq.next_value(), primary_key=True)
     user_id = sa.Column(BIGINT, sa.ForeignKey("users.users.id"))
     observation_name = sa.Column(TEXT, nullable=False)
     observation_description = sa.Column(TEXT)

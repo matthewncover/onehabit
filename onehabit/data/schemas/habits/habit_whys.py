@@ -13,7 +13,8 @@ class HabitWhy(SA_BASE):
     __tablename__ = "habit_why"
     __table_args__ = {"schema": "habits"}
 
-    id = sa.Column(BIGINT, primary_key=True)
+    id_seq = sa.Sequence("seq_habit_why_id", schema="habits", metadata=SA_BASE.metadata)
+    id = sa.Column(BIGINT, id_seq, server_default=id_seq.next_value(), primary_key=True)
     user_id = sa.Column(BIGINT, sa.ForeignKey("users.users.id"))
     habit_id = sa.Column(BIGINT, sa.ForeignKey("users.habits.id"))
     why_description = sa.Column(TEXT)
