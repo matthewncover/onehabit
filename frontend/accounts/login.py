@@ -1,54 +1,45 @@
+from typing import List
 import streamlit as st
-import bcrypt
 
-from .. import Page
-from ..utils import Utils
+from frontend import Tab
 
-from onehabit import User
+from onehabit.data.encryption import EncryptionUtils
+from onehabit.data.schemas.users import User
 
-class LoginPage(Page):
+class AccountLoginTab(Tab):
 
     def __init__(self):
         super().__init__()
+        self.login_form()
         
-        _, col, _ = st.columns(3)
-        with col:
-            st.header("Login")
-            self.login_form()
-
-        if col.button("Create account"):
-            st.session_state.current_page = "CreateAccountPage"
-            st.experimental_rerun()
-
     def login_form(self):
         with st.form(key="login_form"):
             
-            username_input = st.text_input("Username", value="matthew")
-            password_input = st.text_input("Password", type="password", value="yeet69")
+            username_input = st.text_input("username", value="matthew")
+            password_input = st.text_input("password", type="password", value="yeet-salad")
 
-            if st.form_submit_button("Submit"):
-                hashed_password = self.gtdb.get_password_hash(username=username_input)
-                if password_input is not None and hashed_password is not None:
-                    password_validated = self._check_password(hashed_password, password_input)
-
-                    if hashed_password and password_validated:
-                        st.session_state.current_page = "MainPage"
-
-                        st.session_state.user = User.from_existing(username_input)
-
-                        st.success("Success")
-                        st.experimental_rerun()
-
-                    else:
-                        st.error("Incorrect password")
+            if st.form_submit_button("login"):
+                users: List[User] = self.ohdb.pull(User, User.username == username_input)
+                if not users:
+                    st.error("user not found. tough.")
 
                 else:
-                    st.error(f"User '{username_input}' not found.")
+                    user = users[0]
 
-    def _check_password(self, hashed_password, password_input):
-        return bcrypt.checkpw(
-            password=password_input.encode('utf-8'),
-            hashed_password=hashed_password
-        )
+                    hashed_password = user.password_hash
+                    if password_input is not None and hashed_password is not None:
+                        password_validated = EncryptionUtils.check_password(hashed_password, password_input)
+
+                        if hashed_password and password_validated:
+                            st.session_state.current_page = "UserDashboardPage"
+                            st.session_state.user = user
+
+                            st.success("success")
+                            st.rerun()
+
+                        else:
+                            st.error("incorrect password")
+
+
 
     

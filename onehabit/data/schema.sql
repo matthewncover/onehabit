@@ -6,8 +6,8 @@ create schema tracker;
 
 CREATE TABLE users.users (
     id bigint PRIMARY key,
-    username character varying(255) NOT NULL,
-    email character varying(255),
+    username character varying(255) UNIQUE NOT NULL,
+    email character varying(255) UNIQUE,
     password_hash bytea NOT NULL,
     data jsonb default '{}'::jsonb not null,
 
@@ -101,6 +101,16 @@ CREATE TABLE tracker.habit_reflections (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     modified_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+create sequence users.seq_users_id;
+create sequence users.seq_habits_id;
+create sequence habits.seq_habit_versions_id;
+create sequence habits.seq_habit_why_id;
+create sequence observations.seq_observations_id;
+create sequence coach.seq_dialogues_id;
+create sequence coach.seq_prompts_id;
+create sequence tracker.seq_daily_tracker_id;
+create sequence tracker.seq_habit_reflections_id;
 
 CREATE INDEX idx_users_habits_on_user_id ON users.habits (user_id);
 CREATE INDEX idx_habits_versions_on_habit_id ON habits.habit_versions (habit_id);

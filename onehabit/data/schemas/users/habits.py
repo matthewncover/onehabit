@@ -26,7 +26,8 @@ class Habit(SA_BASE):
     __tablename__ = "habits"
     __table_args__ = {'schema': "users"}
 
-    id = sa.Column(BIGINT, primary_key=True)
+    id_seq = sa.Sequence("seq_habits_id", schema="users", metadata=SA_BASE.metadata)
+    id = sa.Column(BIGINT, id_seq, server_default=id_seq.next_value(), primary_key=True)
     user_id = sa.Column(BIGINT, sa.ForeignKey("users.users.id"))
     data = sa.Column(JSONBPydantic(HabitDetails))
 

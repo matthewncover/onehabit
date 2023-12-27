@@ -1,45 +1,48 @@
+import time
 import streamlit as st
-import bcrypt
 
-from .. import Page
-from ..utils import Utils
+from frontend import Tab
+from onehabit.data.schemas.users import User, NewUserValidationError
 
-from onehabit import OneHabitDatabase
-
-class CreateAccountPage(Page):
+class AccountCreationTab(Tab):
 
     def __init__(self):
         super().__init__()
-
-        _, col, back_col = st.columns(3)
-        with col:
-            st.header("Create Account")
-            self.create_account_form()
-
-        with back_col:
-            Utils.empty_lines(20)
-            Utils.back_button("LoginPage")
+        self.create_account_form()
 
     def create_account_form(self):
         with st.form(key="account_form"):
-            username_input = st.text_input("Username")
-            password_input = st.text_input("Password", type="password")
-            password_again_input = st.text_input("Re-enter password", type="password")
-            email_input = st.text_input("Email (super optional)")
+            username_input = st.text_input("username")
+            password_input = st.text_input("password", type="password")
+            password_again_input = st.text_input("re-enter password", type="password")
+            email_input = st.text_input("email (optional)")
 
-            if st.form_submit_button("Yeet"):
-                pass
-                ## check if username already exists
-                ## require username to be at least 5 characters, and not contain any special characters or whitespace
-                ## require password to be at least 7 characters
-                ## check that the two passwords entered match
-                ## validate email with regex if not None
+            if st.form_submit_button("create"):
+                if self._username_exists(username_input):
+                    st.error("username already exists")
 
-    def _check_username_exists(self):
-        gtdb = OneHabitDatabase()
+                elif password_input != password_again_input:
+                    st.error("passwords don't match")
 
-    def hash_password(password):
-        return bcrypt.hashpw(
-            password.encode("utf-8"),
-            bcrypt.gensalt()
-        )
+                else:
+                    user_data = {
+                        "username": username_input,
+                        "email": None if not email_input else email_input,
+                        "password": password_input
+                    }
+                    try:
+                        user = User(**user_data)
+                        self.ohdb.add(user)
+                        st.success("right on")
+                        time.sleep(1)
+
+                        ## TODO
+                        ## go to introduction
+
+                    except NewUserValidationError as e:
+                        for msg in e.display_msgs:
+                            st.error(msg)
+
+    def _username_exists(self, username_input):
+        users = self.ohdb.pull(User, User.username == username_input)
+        return True if users else False

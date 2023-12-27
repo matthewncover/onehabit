@@ -13,7 +13,8 @@ class DailyTracker(SA_BASE):
     __tablename__ = "daily_tracker"
     __table_args__ = {"schema": "tracker"}
 
-    id = sa.Column(BIGINT, primary_key=True)
+    id_seq = sa.Sequence("seq_daily_tracker_id", schema="tracker", metadata=SA_BASE.metadata)
+    id = sa.Column(BIGINT, id_seq, server_default=id_seq.next_value(), primary_key=True)
     user_id = sa.Column(BIGINT, sa.ForeignKey("users.users.id"))
     track_date = sa.Column(DATE, nullable=False)
     data = sa.Column(JSONBPydantic(DailyTrackerDataModel), default='{}', nullable=False)

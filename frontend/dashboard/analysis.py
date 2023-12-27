@@ -1,7 +1,7 @@
 import streamlit as st
 
-from . import Tab
-from .utils import Utils
+from frontend import Tab
+from frontend.utils import StUtils
 
 class AnalysisTab(Tab):
 

@@ -8,7 +8,8 @@ class Prompt(SA_BASE):
     __tablename__ = "prompts"
     __table_args__ = {"schema": "coach"}
 
-    id = sa.Column(BIGINT, primary_key=True)
+    id_seq = sa.Sequence("seq_prompts_id", schema="coach", metadata=SA_BASE.metadata)
+    id = sa.Column(BIGINT, id_seq, server_default=id_seq.next_value(), primary_key=True)
     dialogue_id = sa.Column(BIGINT, sa.ForeignKey("coach.dialogues.id"))
     prompt_text = sa.Column(TEXT, nullable=False)
 

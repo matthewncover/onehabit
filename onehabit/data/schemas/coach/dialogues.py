@@ -8,7 +8,8 @@ class Dialogue(SA_BASE):
     __tablename__ = "dialogues"
     __table_args__ = {"schema": "coach"}
 
-    id = sa.Column(BIGINT, primary_key=True)
+    id_seq = sa.Sequence("seq_dialogues_id", schema="coach", metadata=SA_BASE.metadata)
+    id = sa.Column(BIGINT, id_seq, server_default=id_seq.next_value(), primary_key=True)
     user_id = sa.Column(BIGINT, sa.ForeignKey("users.users.id"))
     dialogue_name = sa.Column(VARCHAR(255))
     dialogue_version = sa.Column(INTEGER)
