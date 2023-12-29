@@ -1,6 +1,5 @@
 from typing import List
 import time
-
 import streamlit as st
 
 from frontend import Tab
@@ -14,13 +13,16 @@ class StUtils:
             st.session_state.current_page = page
             st.rerun()
 
-    @staticmethod
-    def logout_button(key:str):
+    @classmethod
+    def logout_button(cls, key:str):
         logout = st.button("logout", key=key)
         if logout:
-            st.session_state.current_page = "WelcomePage"
-            st.session_state.clear()
-            st.rerun()
+            cls.logout()
+
+    def logout():
+        st.session_state.current_page = "WelcomePage"
+        st.session_state.clear()
+        st.rerun()
     
     @staticmethod
     def empty_lines(n=1):
@@ -31,14 +33,8 @@ class StUtils:
         st.write("Not Implemented")
 
     @staticmethod
-    def display_tabs(tab_names:List[str], tab_classes:List[Tab]):
-        for tab_col, tab_cls in zip(st.tabs(tab_names), tab_classes):
-            with tab_col:
-                tab_cls()
-
-    @staticmethod
     def typewriter(text: str, speed: int = 10):
-        """ credit: https://discuss.streamlit.io/t/st-write-typewritter/43111/3
+        """https://discuss.streamlit.io/t/st-write-typewritter/43111/3
         """
         # tokens = text.split()
         # tokens = list(text)
@@ -50,8 +46,9 @@ class StUtils:
             container.markdown(curr_full_text, unsafe_allow_html=True)
             time.sleep(1 / speed)
 
-    ## BUG
-    ## does not work
     @staticmethod
-    def aligned_text(text:str, how="center"):
-        st.markdown(f"<text style='text-align: {how}; color: white;'>{text}</text>", unsafe_allow_html=True)
+    def display_tabs(tab_names:List[str], tab_classes:List[Tab]):
+        for tab_col, tab_cls in zip(st.tabs(tab_names), tab_classes):
+            with tab_col:
+                tab_cls()
+

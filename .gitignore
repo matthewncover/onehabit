@@ -2,6 +2,7 @@
 weights/*
 secrets.toml
 *sandbox*
+debug.py
 TODO
 
 frontend-vue

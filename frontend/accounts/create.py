@@ -12,14 +12,15 @@ class AccountCreationTab(Tab):
 
     def create_account_form(self):
         with st.form(key="account_form"):
-            username_input = st.text_input("username")
-            password_input = st.text_input("password", type="password")
-            password_again_input = st.text_input("re-enter password", type="password")
-            email_input = st.text_input("email (optional)")
+            username_input = st.text_input("username", value="yeeeeee")
+            password_input = st.text_input("password", type="password", value="yeeeeee")
+            password_again_input = st.text_input("re-enter password", type="password", value="yeeeeee")
+            age_input = st.text_input("age", help="analytics purposes only. your info is never shared.", value=18)
+            email_input = st.text_input("email (optional)", help="no spam. password resetting purposes only.")
 
             if st.form_submit_button("create"):
                 if self._username_exists(username_input):
-                    st.error("username already exists")
+                    st.error("username already exists. tough")
 
                 elif password_input != password_again_input:
                     st.error("passwords don't match")
@@ -28,16 +29,16 @@ class AccountCreationTab(Tab):
                     user_data = {
                         "username": username_input,
                         "email": None if not email_input else email_input,
-                        "password": password_input
+                        "password": password_input,
+                        "age": age_input
                     }
                     try:
-                        user = User(**user_data)
-                        self.ohdb.add(user)
+                        st.session_state.user = User(**user_data)
                         st.success("right on")
                         time.sleep(1)
 
-                        ## TODO
-                        ## go to introduction
+                        st.session_state.current_page = "DisclaimerPage"
+                        st.rerun()
 
                     except NewUserValidationError as e:
                         for msg in e.display_msgs:

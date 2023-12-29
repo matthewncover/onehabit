@@ -1,0 +1,7 @@
+from frontend.introduction.philosophy import PhilosophyPage
+from frontend.introduction.coach_intro import CoachIntroductionPage
+from frontend.introduction.habit_intro import HabitIntroductionPage
+from frontend.introduction.coach_habit_discussion import CoachHabitDiscussionPage
+from frontend.introduction.habit_definition import HabitDefinitionPage
+from frontend.introduction.habit_why import HabitWhyPage
+from frontend.introduction.habit_summary import HabitSummaryPage
