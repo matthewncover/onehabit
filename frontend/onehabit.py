@@ -1,13 +1,6 @@
-from enum import Enum
-
 import streamlit as st
 
-from .welcome import WelcomePage
-from .dashboard.dashboard import UserDashboardPage
-
-class Pages(Enum):
-    WelcomePage = WelcomePage
-    UserDashboardPage = UserDashboardPage
+from frontend.pages import Pages
 
 class OneHabitApp:
 

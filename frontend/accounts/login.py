@@ -14,7 +14,6 @@ class AccountLoginTab(Tab):
         
     def login_form(self):
         with st.form(key="login_form"):
-            
             username_input = st.text_input("username", value="matthew")
             password_input = st.text_input("password", type="password", value="yeet-salad")
 
@@ -31,9 +30,8 @@ class AccountLoginTab(Tab):
                         password_validated = EncryptionUtils.check_password(hashed_password, password_input)
 
                         if hashed_password and password_validated:
-                            st.session_state.current_page = "UserDashboardPage"
                             st.session_state.user = user
-
+                            st.session_state.current_page = user.data.current_page
                             st.success("success")
                             st.rerun()
 

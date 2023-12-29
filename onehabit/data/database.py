@@ -81,3 +81,12 @@ class OneHabitDatabase:
             records = query.all()
 
         return records
+    
+    def delete(self, records: Union[SA_BASE, List[SA_BASE]]) -> None:
+        records = DevUtils.assert_as_list(records)
+
+        with self.session_maker() as session:
+            for record in records:
+                session.delete(record)
+
+            session.commit()

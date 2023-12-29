@@ -1,3 +1,4 @@
+import json
 from uuid import UUID
 from dataclasses import is_dataclass, fields
 
@@ -14,11 +15,13 @@ class JSONBPydantic(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if value is not None:
-            return value.model_dump_json()
+                return value.model_dump_json()
         return value
     
     def process_result_value(self, value, dialect):
         if value is not None:
+            if isinstance(value, str):
+                value = json.loads(value)
             return self.model(**value)
         return value        
 
