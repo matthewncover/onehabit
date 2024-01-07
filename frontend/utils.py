@@ -3,6 +3,10 @@ import time
 import streamlit as st
 
 from frontend import Tab
+from onehabit.coach.openai.messages import Message
+
+from onehabit.data import ohdb
+from onehabit.data.schemas import Dialogue
 
 class StUtils:
 
@@ -33,7 +37,7 @@ class StUtils:
         st.write("Not Implemented")
 
     @staticmethod
-    def typewriter(text: str, speed: int = 10):
+    def typewriter(text: str, speed: int = 40):
         """https://discuss.streamlit.io/t/st-write-typewritter/43111/3
         """
         # tokens = text.split()
@@ -52,3 +56,29 @@ class StUtils:
             with tab_col:
                 tab_cls()
 
+    @classmethod
+    def coach_oneoff_response(cls, prompt):
+        messages = [Message.to_openai_format(role="system", content=prompt)]
+        response = st.session_state.coach._respond(messages)
+        cls.display_coach_response(response)
+
+    @classmethod
+    def coach_dialogue_response(cls):
+        response = st.session_state.coach.respond()
+        cls.display_coach_response(response)
+
+    @staticmethod
+    def display_coach_response(response: str):
+        st_msg = st.chat_message("coach")
+        with st_msg:
+            StUtils.typewriter(response, speed=100)
+
+    @staticmethod
+    def display_dialogue(dialogue):
+        for chat_message in dialogue.full_text:
+            role, chat_text = Message.from_openai_format(chat_message)
+            st_msg = st.chat_message(role)
+            if role == "coach":
+                st_msg.markdown(chat_text, unsafe_allow_html=True)
+            else:
+                st_msg.write(chat_text)

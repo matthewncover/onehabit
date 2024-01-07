@@ -3,8 +3,8 @@ import streamlit as st
 from frontend import Tab
 from frontend.utils import StUtils
 
-class FeedbackTab(Tab):
+class CoachTab(Tab):
 
     def __init__(self):
-        st.write("Feedback to dev form")
+        st.write("discuss with coach")
         StUtils.empty_lines(5)

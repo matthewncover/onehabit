@@ -6,7 +6,7 @@ from frontend.dashboard.dashboard import UserDashboardPage
 from frontend.accounts.disclaimer import DisclaimerPage
 from frontend.introduction import (
     PhilosophyPage, CoachIntroductionPage,
-    HabitIntroductionPage, CoachHabitDiscussionPage,
+    HabitIntroductionPage, HabitIdentificationPage,
     HabitDefinitionPage, HabitWhyPage,
     HabitSummaryPage
 )
@@ -19,7 +19,7 @@ class Pages(Enum):
     PhilosophyPage = PhilosophyPage
     CoachIntroductionPage = CoachIntroductionPage
     HabitIntroductionPage = HabitIntroductionPage
-    CoachHabitDiscussionPage = CoachHabitDiscussionPage
+    HabitIdentificationPage = HabitIdentificationPage
     HabitDefinitionPage = HabitDefinitionPage
     HabitWhyPage = HabitWhyPage
     HabitSummaryPage = HabitSummaryPage

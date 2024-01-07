@@ -1,6 +1,7 @@
 import streamlit as st
 
 from frontend import Page
+from frontend.texts import PHILOSOPHY_TEXT
 from frontend.introduction.utils import IntroUtils
 
 class PhilosophyPage(Page):
@@ -9,8 +10,6 @@ class PhilosophyPage(Page):
 
         with IntroUtils.default_col():
             st.write("onehabit philosophy")
-            ## hypotheses
+            st.markdown(PHILOSOPHY_TEXT, unsafe_allow_html=True)
 
             IntroUtils.back_save_continue(continue_to="CoachIntroductionPage")
-            
-            pass
