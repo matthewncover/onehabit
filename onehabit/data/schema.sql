@@ -63,9 +63,20 @@ CREATE TABLE observations.observations (
 CREATE TABLE coach.dialogues (
     id bigint PRIMARY KEY,
     user_id bigint REFERENCES users.users(id),
-    dialogue_name character varying(255),
-    dialogue_version integer,
-    dialogue_text text NOT NULL,
+    name character varying(255),
+    version integer,
+    full_text jsonb,
+    summarized_text jsonb,
+
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    modified_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+create table coach.personalities (
+    id bigint primary key,
+    name character varying(255) not null,
+    description text not null,
+    data jsonb default '{}'::jsonb,
 
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     modified_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -109,6 +120,7 @@ create sequence habits.seq_habit_why_id;
 create sequence observations.seq_observations_id;
 create sequence coach.seq_dialogues_id;
 create sequence coach.seq_prompts_id;
+create sequence coach.seq_personalities_id;
 create sequence tracker.seq_daily_tracker_id;
 create sequence tracker.seq_habit_reflections_id;
 

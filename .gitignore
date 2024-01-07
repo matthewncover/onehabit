@@ -4,6 +4,7 @@ secrets.toml
 *sandbox*
 debug.py
 TODO
+*.ipynb
 
 frontend-vue
 node_modules

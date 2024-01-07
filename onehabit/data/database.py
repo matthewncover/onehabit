@@ -80,8 +80,11 @@ class OneHabitDatabase:
 
             records = query.all()
 
-        return records
-    
+        if records:
+            return records
+        else:
+            return [None]
+        
     def delete(self, records: Union[SA_BASE, List[SA_BASE]]) -> None:
         records = DevUtils.assert_as_list(records)
 

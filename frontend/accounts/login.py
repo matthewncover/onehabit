@@ -2,6 +2,7 @@ from typing import List
 import streamlit as st
 
 from frontend import Tab
+from frontend.accounts.load_state import UserState
 
 from onehabit.data.encryption import EncryptionUtils
 from onehabit.data.schemas.users import User
@@ -31,7 +32,9 @@ class AccountLoginTab(Tab):
 
                         if hashed_password and password_validated:
                             st.session_state.user = user
-                            st.session_state.current_page = user.data.current_page
+                            user_state = UserState(user)
+                            user_state.load()
+                            
                             st.success("success")
                             st.rerun()
 

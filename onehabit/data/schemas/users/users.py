@@ -8,6 +8,7 @@ from pydantic import BaseModel, EmailStr, ValidationError, conint, constr, valid
 from onehabit.data.encryption import EncryptionUtils
 from onehabit.data.schemas import SA_BASE
 from onehabit.data.utils import JSONBPydantic
+from onehabit.data.schemas.users.utils import UserUtils
 
 class NewUserValidationError(Exception):
 
@@ -54,6 +55,7 @@ class UserDataModel(BaseModel):
     age: Optional[int] = None
     setup_complete: Optional[bool] = False
     current_page: Optional[str] = None
+    coach_personality_id: Optional[int] = None
 
 
 class User(SA_BASE):
@@ -94,6 +96,9 @@ class User(SA_BASE):
         }
         
         super().__init__(**user_data)
-        
+
+    def init_coach_settings(self):
+        self.coach_personality = UserUtils.init_coach_settings(self)
+
     def __repr__(self):
         return f"<User(username={self.username})>"
