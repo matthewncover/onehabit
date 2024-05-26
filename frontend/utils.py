@@ -5,9 +5,6 @@ import streamlit as st
 from frontend import Tab
 from onehabit.coach.openai.messages import Message
 
-from onehabit.data import ohdb
-from onehabit.data.schemas import Dialogue
-
 class StUtils:
 
     @staticmethod

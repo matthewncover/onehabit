@@ -1,8 +1,8 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import BIGINT, TEXT, TIMESTAMP, VARCHAR
 
 from onehabit.data.schemas import SA_BASE
+from onehabit.data.utils import DataUtils
 
 class Prompt(SA_BASE):
     __tablename__ = "prompts"
@@ -15,6 +15,9 @@ class Prompt(SA_BASE):
 
     created_at = sa.Column(TIMESTAMP, default=sa.sql.func.now(), nullable=False)
     modified_at = sa.Column(TIMESTAMP, default=sa.sql.func.now(), nullable=False)
+
+    def to_dict(self):
+        return DataUtils.serialize(self)
 
     def __repr__(self):
         return f"<Prompt(id={self.id}, name={self.dialogue_name})>"

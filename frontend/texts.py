@@ -55,7 +55,7 @@ before you discuss with Coach, here are some ideas for what makes a great habit:
 
 * *sustainability*: start with small, achievable goals to avoid burnout. it's about building a habit that you can maintain in the long run, not just a fleeting effort.
 
-* *context independence*: define the habit flexibly enough to be able to perform it in any environment (e.g., while away on vacation).
+* *context independence*: define the habit flexibly enough to be able to perform it in any environment (e.g., while away traveling).
 
 think of your habit as a seed. with the right nurturing - understanding its importance, aligning it with your values, and setting realistic goals - it can grow into a powerful force for positive change in your life.
 

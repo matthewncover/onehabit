@@ -7,4 +7,7 @@ class UserUtils:
     def init_coach_settings(user):
         personality_id = user.data.coach_personality_id
         coach_personality = ohdb.pull(Personality, Personality.id == personality_id)[0]
-        return coach_personality
+        if coach_personality:
+            return coach_personality
+        else:
+            return ohdb.pull(Personality, Personality.id == 1)[0]
