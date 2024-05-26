@@ -9,7 +9,6 @@ class PhilosophyPage(Page):
     def __init__(self):
 
         with IntroUtils.default_col():
-            st.write("onehabit philosophy")
             st.markdown(PHILOSOPHY_TEXT, unsafe_allow_html=True)
 
             IntroUtils.back_save_continue(continue_to="CoachIntroductionPage")

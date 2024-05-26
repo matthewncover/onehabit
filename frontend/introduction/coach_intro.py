@@ -7,7 +7,7 @@ from frontend.introduction.utils import IntroUtils
 
 from frontend.tmp_prompts import COACH_PERSONALITY_INTRO_PROMPT
 
-from onehabit.coach.openai.models import Coach
+from onehabit.coach import Coach
 from onehabit.data.schemas import Personality
 
 class CoachIntroductionPage(Page):
@@ -15,7 +15,6 @@ class CoachIntroductionPage(Page):
     def __init__(self):
         st.session_state.setdefault("personalities", self.ohdb.pull(Personality))
         st.session_state.setdefault("coach_personality_obj", None)
-        st.session_state.coach: Coach
 
         with IntroUtils.default_col():
             st.markdown(COACH_INTRO_TEXT)
@@ -27,6 +26,8 @@ class CoachIntroductionPage(Page):
             if chosen_personality_name != "select one":
                 personality_obj: Personality = self.get_personality_obj(chosen_personality_name)
                 st.session_state.coach_personality_obj = personality_obj
+                setattr(st.session_state.user.data, "coach_personality_id", personality_obj.id)
+                st.session_state.coach = Coach(st.session_state.user)
                 StUtils.coach_oneoff_response(COACH_PERSONALITY_INTRO_PROMPT + personality_obj.description)
                 self.update_coach_personality_preference(personality_obj)
 

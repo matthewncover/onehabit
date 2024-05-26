@@ -14,6 +14,7 @@ class WelcomePage:
 
             with content_col:
                 # StUtils.typewriter(WELCOME_TEXT, speed=300)
+                st.write("<streaming welcome text>")
                 pass
 
         with sign_in_col:

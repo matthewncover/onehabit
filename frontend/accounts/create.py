@@ -45,5 +45,5 @@ class AccountCreationTab(Tab):
                             st.error(msg)
 
     def _username_exists(self, username_input):
-        users = self.ohdb.pull(User, User.username == username_input)
+        users = self.ohdb.pull(User, User.username == username_input)[0]
         return True if users else False

@@ -84,7 +84,8 @@ create table coach.personalities (
 
 CREATE TABLE coach.prompts (
     id bigint PRIMARY KEY,
-    dialogue_id bigint REFERENCES coach.dialogues(id),
+    dialogue_id bigint,
+    dialogue_name character varying(255) unique not null,
     prompt_text text NOT NULL,
 
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,

@@ -29,6 +29,12 @@ class JSONBPydantic(TypeDecorator):
 class DataUtils:
 
     @staticmethod
+    def serialize(obj):
+        """ dump sqlalch class inst to dict
+        """
+        return {k: v for k, v in obj.__dict__.items() if not k.startswith("_")}
+
+    @staticmethod
     def make_payload(obj):
         if is_dataclass(obj):
             return {f.name: DataUtils._prepare_value(getattr(obj, f.name))

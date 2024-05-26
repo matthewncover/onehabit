@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import BIGINT, VARCHAR, TEXT, JSONB, TIMESTAMP
 
 from onehabit.data.schemas import SA_BASE
+from onehabit.data.utils import DataUtils
 
 class Personality(SA_BASE):
 
@@ -18,6 +19,9 @@ class Personality(SA_BASE):
 
     created_at = sa.Column(TIMESTAMP, default=sa.sql.func.now(), nullable=False)
     modified_at = sa.Column(TIMESTAMP, default=sa.sql.func.now(), nullable=False)
+
+    def to_dict(self):
+        return DataUtils.serialize(self)
 
     def __repr__(self):
         return f"<Personality(id={self.id}, name={self.name})>"

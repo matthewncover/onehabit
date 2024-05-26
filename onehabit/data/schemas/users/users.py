@@ -6,8 +6,8 @@ from sqlalchemy.dialects.postgresql import TIMESTAMP, VARCHAR, BYTEA, BIGINT
 from pydantic import BaseModel, EmailStr, ValidationError, conint, constr, validator, Field
 
 from onehabit.data.encryption import EncryptionUtils
-from onehabit.data.schemas import SA_BASE
-from onehabit.data.utils import JSONBPydantic
+from onehabit.data.schemas.base import SA_BASE
+from onehabit.data.utils import JSONBPydantic, DataUtils
 from onehabit.data.schemas.users.utils import UserUtils
 
 class NewUserValidationError(Exception):
@@ -99,6 +99,9 @@ class User(SA_BASE):
 
     def init_coach_settings(self):
         self.coach_personality = UserUtils.init_coach_settings(self)
+
+    def to_dict(self):
+        return DataUtils.serialize(self)
 
     def __repr__(self):
         return f"<User(username={self.username})>"

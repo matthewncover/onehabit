@@ -1,38 +1,9 @@
-import os, openai
-from dotenv import load_dotenv
-
 from onehabit.data import ohdb
 from onehabit.data.schemas import User, Dialogue, Prompt
 
+from onehabit.coach.openai.models import OpenAIModel
 from onehabit.coach.openai.messages import Message
 from onehabit.data.schemas.coach.personalities import Personality
-
-load_dotenv()
-
-class OpenAIModel:
-    MODEL = "gpt-3.5-turbo"
-
-    def __init__(self):
-        client = openai.OpenAI()
-        client.api_key = os.getenv("OPENAI_API_KEY")
-
-        self.client = client
-
-    def _respond(self, messages:list, stream:bool=False):
-        response = self.client.chat.completions.create(
-            model=self.MODEL,
-            messages=messages,
-            stream=stream
-        )
-
-        return response if stream else response.choices[0].message.content
-
-    def stream_response(self, stream: openai.Stream):
-        for chunk in stream:
-            content = chunk.choices[0].delta.content
-            if content is not None:
-                yield content
-
 
 class NoOpenDialogueError(Exception):
     pass
@@ -50,7 +21,7 @@ class Coach(OpenAIModel):
         filters = [Dialogue.user_id == self.user.id, Dialogue.name == dialogue_name]
         self.dialogue = ohdb.pull(Dialogue, *filters)[0]
 
-        self._set_prompt(dialogue_name)
+        self._set_prompt(dialogue_name, dynamic_prompt_fn=self._inject_personality)
         return self.dialogue
 
     def respond(self):
@@ -73,19 +44,14 @@ class Coach(OpenAIModel):
 
     #endregion
     #region helper methods
-
-    def _set_prompt(self, dialogue_name):
-        filters = [Prompt.dialogue_name == dialogue_name]
-        prompt = ohdb.pull(Prompt, *filters)[0]
-
-        prompt_text = (
-            prompt.prompt_text
+        
+    def _inject_personality(self, prompt_text):
+        modified_prompt_text = (
+            prompt_text
             .replace(Personality.PROMPT_PLACEHOLDER, 
                      self.user.coach_personality.description)
         )
-
-        self.system_message = Message.to_openai_format(role="system", content=prompt_text)
-
+        return modified_prompt_text
 
     def _verify_turn(self, next_role: str):
         """ verify the chat being saved is for a role that is not
@@ -108,8 +74,3 @@ class Coach(OpenAIModel):
         return len(self.dialogue.full_text)
 
     #endregion
-
-
-class Summarizer(OpenAIModel):
-    def __init__(self):
-        super().__init__()

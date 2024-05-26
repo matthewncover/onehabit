@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import BIGINT, JSONB, VARCHAR, INTEGER, TEXT, TIMESTAMP
 
 from onehabit.data.schemas import SA_BASE
+from onehabit.data.utils import DataUtils
 
 class Dialogue(SA_BASE):
     __tablename__ = "dialogues"
@@ -20,6 +21,9 @@ class Dialogue(SA_BASE):
     modified_at = sa.Column(TIMESTAMP, default=sa.sql.func.now(), nullable=False)
 
     user = relationship("User", back_populates="dialogues")
+
+    def to_dict(self):
+        return DataUtils.serialize(self)
 
     def __repr__(self):
         return f"<Dialogue(id={self.id}, name={self.name}, version={self.version})>"
